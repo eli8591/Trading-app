@@ -9,6 +9,8 @@ interface AppState {
   trades: Trade[];
   activeAccountId: string | null;
   hasHydrated: boolean;
+  /** Lock-episode keys (see utils/lock.ts) the user has confirmed via the breach lock screen. */
+  acknowledgedLocks: Record<string, string>;
 
   addAccount: (input: {
     name: string;
@@ -24,6 +26,8 @@ interface AppState {
   addTrade: (input: { accountId: string; amount: number; setupTag?: string; notes?: string; timestamp?: string }) => void;
   deleteTrade: (id: string) => void;
 
+  acknowledgeLock: (lockKey: string) => void;
+
   setHasHydrated: (value: boolean) => void;
 }
 
@@ -34,6 +38,7 @@ export const useStore = create<AppState>()(
       trades: [],
       activeAccountId: null,
       hasHydrated: false,
+      acknowledgedLocks: {},
 
       addAccount: (input) => {
         const id = generateId();
@@ -88,6 +93,12 @@ export const useStore = create<AppState>()(
         set((state) => ({ trades: state.trades.filter((t) => t.id !== id) }));
       },
 
+      acknowledgeLock: (lockKey) => {
+        set((state) => ({
+          acknowledgedLocks: { ...state.acknowledgedLocks, [lockKey]: new Date().toISOString() },
+        }));
+      },
+
       setHasHydrated: (value) => set({ hasHydrated: value }),
     }),
     {
@@ -97,6 +108,7 @@ export const useStore = create<AppState>()(
         accounts: state.accounts,
         trades: state.trades,
         activeAccountId: state.activeAccountId,
+        acknowledgedLocks: state.acknowledgedLocks,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);

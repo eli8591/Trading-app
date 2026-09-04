@@ -1,13 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { GlassCard } from '../components/GlassCard';
+import { LockNotice } from '../components/LockNotice';
 import { Screen } from '../components/Screen';
 import { Segmented } from '../components/form/Segmented';
 import { TextField } from '../components/form/TextField';
 import { useStore } from '../store/useStore';
 import { colors, fonts, radii, spacing } from '../theme/theme';
-import { currentTradingDayKey, tradingDayKey } from '../utils/drawdown';
+import { computeAccountSnapshot, currentTradingDayKey, tradingDayKey } from '../utils/drawdown';
 import { formatSignedCurrency } from '../utils/format';
+import { getLockInfo } from '../utils/lock';
 
 type Result = 'win' | 'loss';
 
@@ -48,7 +50,11 @@ export default function LogTradeScreen() {
     );
   }
 
+  const snapshot = computeAccountSnapshot(account, trades);
+  const lock = getLockInfo(account, snapshot);
+
   function handleAdd() {
+    if (lock.locked) return;
     const value = Number(amount);
     if (!amount.trim() || !Number.isFinite(value) || value < 0) {
       Alert.alert('Invalid amount', 'Enter a positive dollar amount for the trade result.');
@@ -71,32 +77,38 @@ export default function LogTradeScreen() {
         <Text style={styles.title}>Log Trade</Text>
         <Text style={styles.accountLabel}>{account.name}</Text>
 
-        <View style={{ marginBottom: spacing.md }}>
-          <Segmented options={RESULT_OPTIONS} value={result} onChange={setResult} />
-        </View>
-        <TextField
-          label="Amount ($)"
-          placeholder="0.00"
-          keyboardType="decimal-pad"
-          value={amount}
-          onChangeText={setAmount}
-        />
-        <TextField
-          label="Setup tag (optional)"
-          placeholder="e.g. VWAP Pullback, EMA Cross"
-          value={setupTag}
-          onChangeText={setSetupTag}
-        />
-        <TextField
-          label="Notes (optional)"
-          placeholder="Session notes"
-          value={notes}
-          onChangeText={setNotes}
-          multiline
-        />
-        <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
-          <Text style={styles.addButtonText}>Add trade</Text>
-        </TouchableOpacity>
+        {lock.locked ? (
+          <LockNotice account={account} lock={lock} />
+        ) : (
+          <>
+            <View style={{ marginBottom: spacing.md }}>
+              <Segmented options={RESULT_OPTIONS} value={result} onChange={setResult} />
+            </View>
+            <TextField
+              label="Amount ($)"
+              placeholder="0.00"
+              keyboardType="decimal-pad"
+              value={amount}
+              onChangeText={setAmount}
+            />
+            <TextField
+              label="Setup tag (optional)"
+              placeholder="e.g. VWAP Pullback, EMA Cross"
+              value={setupTag}
+              onChangeText={setSetupTag}
+            />
+            <TextField
+              label="Notes (optional)"
+              placeholder="Session notes"
+              value={notes}
+              onChangeText={setNotes}
+              multiline
+            />
+            <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
+              <Text style={styles.addButtonText}>Add trade</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
       <Text style={styles.sectionTitle}>Today's trades</Text>

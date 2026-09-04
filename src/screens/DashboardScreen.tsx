@@ -5,11 +5,13 @@ import { CautionBanner } from '../components/CautionBanner';
 import { CircularGauge } from '../components/CircularGauge';
 import { GlassCard } from '../components/GlassCard';
 import { LimitBar, usedFraction } from '../components/LimitBar';
+import { LockNotice } from '../components/LockNotice';
 import { Screen } from '../components/Screen';
 import { useStore } from '../store/useStore';
 import { colors, fonts, radii, spacing, statusColor } from '../theme/theme';
 import { computeAccountSnapshot } from '../utils/drawdown';
 import { formatCurrency, formatPercent, formatSignedCurrency } from '../utils/format';
+import { getLockInfo } from '../utils/lock';
 
 export default function DashboardScreen() {
   const accounts = useStore((s) => s.accounts);
@@ -30,6 +32,7 @@ export default function DashboardScreen() {
 
   const snapshot = computeAccountSnapshot(account, trades);
   const { drawdown, dailyLoss, consistency, profitTargetProgress } = snapshot;
+  const lock = getLockInfo(account, snapshot);
 
   const worstDistance = Math.min(drawdown.distanceToBreach, dailyLoss.distanceToBreach);
   const worstLabel = drawdown.distanceToBreach <= dailyLoss.distanceToBreach ? 'max drawdown' : 'daily loss limit';
@@ -55,7 +58,7 @@ export default function DashboardScreen() {
         <Text style={styles.accountName}>{account.name}</Text>
         <Text style={styles.firmName}>{account.firmName}</Text>
 
-        <CautionBanner snapshot={snapshot} />
+        {lock.locked ? <LockNotice account={account} lock={lock} compact /> : <CautionBanner snapshot={snapshot} />}
 
         <GlassCard glowColor={heroColor} style={styles.heroCard}>
           <Text style={styles.heroLabel}>Distance to breach · {worstLabel}</Text>

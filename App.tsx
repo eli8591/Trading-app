@@ -12,6 +12,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { BreachOverlay } from './src/components/BreachOverlay';
 import RootNavigator from './src/navigation/RootNavigator';
+import { useBreachNotifications } from './src/store/useBreachNotifications';
+import { useSyncAccountStatuses } from './src/store/useSyncAccountStatuses';
 import { useStore } from './src/store/useStore';
 import { colors } from './src/theme/theme';
 
@@ -23,6 +25,9 @@ export default function App() {
     JetBrainsMono_700Bold,
     SpaceMono_700Bold,
   });
+
+  useSyncAccountStatuses();
+  useBreachNotifications();
 
   if (!fontsLoaded || !hasHydrated) {
     return (

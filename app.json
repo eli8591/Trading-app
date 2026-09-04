@@ -1,17 +1,23 @@
 {
   "expo": {
-    "name": "Trading-app",
-    "slug": "Trading-app",
+    "name": "DrawdownGuard",
+    "slug": "drawdownguard",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0A0A0F",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.drawdownguard.app",
+      "infoPlist": {
+        "UIUserInterfaceStyle": "Dark"
+      }
     },
     "android": {
+      "package": "com.drawdownguard.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0A0A0F",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -20,6 +26,15 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#00D9FF"
+        }
+      ]
+    ]
   }
 }
